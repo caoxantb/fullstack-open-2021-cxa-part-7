@@ -1,16 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import Blog from "./components/Blog";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
+import { useSelector, useDispatch } from "react-redux";
+
+import { initializeNotiActionCreators } from "./reducers/notiReducer";
+
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState(null);
+
+  const noti = useSelector((state) => state.noti);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     blogService.getAll().then((initialBlogs) => setBlogs(initialBlogs));
@@ -39,12 +46,11 @@ const App = () => {
       setUsername("");
       setPassword("");
     } catch (ex) {
-      setMessage("Wrong username or password");
       setUsername("");
       setPassword("");
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
+      dispatch(
+        initializeNotiActionCreators("Wrong username or password", 5000)
+      );
     }
   };
 
@@ -58,7 +64,7 @@ const App = () => {
   const loginForm = (
     <div>
       <h2>Log in</h2>
-      <h3 className="error">{message}</h3>
+      <h3 className="error">{noti}</h3>
       <form onSubmit={handleLogin}>
         <div>
           username
@@ -95,12 +101,12 @@ const App = () => {
 
     blogFormRef.current.toggleVisibility();
 
-    setMessage(
-      `a new blog ${createdBlog.title} by ${createdBlog.author} added`
+    dispatch(
+      initializeNotiActionCreators(
+        `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+        5000
+      )
     );
-    setTimeout(() => {
-      setMessage(null);
-    }, 5000);
   };
 
   const updateBlogLikes = async (id) => {
@@ -144,7 +150,7 @@ const App = () => {
             <BlogForm createBlog={addBlog} />
           </Togglable>
           <h2>blogs</h2>
-          <h3>{message}</h3>
+          <h3>{noti}</h3>
           {blogs
             .sort((a, b) => {
               return b.likes - a.likes;

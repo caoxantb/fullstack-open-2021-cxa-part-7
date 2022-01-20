@@ -10,8 +10,8 @@ const Blog = ({ blog, updateBlogLikes, deleteBlog, user }) => {
     marginBottom: 5,
   };
 
-  const deleteConfirmation = (id) => {
-    return window.confirm("Delete blog?") ? deleteBlog(id) : null;
+  const deleteConfirmation = (blogToDelete) => {
+    return window.confirm("Delete blog?") ? deleteBlog(blogToDelete) : null;
   };
 
   return (
@@ -31,7 +31,7 @@ const Blog = ({ blog, updateBlogLikes, deleteBlog, user }) => {
             id="button-like"
             type="submit"
             onClick={() => {
-              updateBlogLikes(blog.id);
+              updateBlogLikes(blog);
             }}
           >
             like
@@ -42,7 +42,7 @@ const Blog = ({ blog, updateBlogLikes, deleteBlog, user }) => {
           <button
             id="button-delete"
             onClick={() => {
-              deleteConfirmation(blog.id);
+              deleteConfirmation(blog);
             }}
           >
             Delete

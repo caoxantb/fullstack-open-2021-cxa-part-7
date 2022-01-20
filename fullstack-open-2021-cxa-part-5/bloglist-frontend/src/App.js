@@ -9,18 +9,24 @@ import loginService from "./services/login";
 import { useSelector, useDispatch } from "react-redux";
 
 import { initializeNotiActionCreators } from "./reducers/notiReducer";
+import {
+  getBlogsActionCreators,
+  addBlogActionCreators,
+  likeActionCreators,
+  deleteActionCreators,
+} from "./reducers/blogReducer";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const blogs = useSelector((state) => state.blog);
   const noti = useSelector((state) => state.noti);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    blogService.getAll().then((initialBlogs) => setBlogs(initialBlogs));
+    dispatch(getBlogsActionCreators());
   }, []);
 
   useEffect(() => {
@@ -95,40 +101,25 @@ const App = () => {
 
   const blogFormRef = useRef();
 
-  const addBlog = async (newBlog) => {
-    const createdBlog = await blogService.create(newBlog);
-    setBlogs([...blogs, createdBlog]);
+  const addBlog = (newBlog) => {
+    dispatch(addBlogActionCreators(newBlog));
 
     blogFormRef.current.toggleVisibility();
 
     dispatch(
       initializeNotiActionCreators(
-        `a new blog ${createdBlog.title} by ${createdBlog.author} added`,
+        `a new blog ${newBlog.title} by ${newBlog.author} added`,
         5000
       )
     );
   };
 
-  const updateBlogLikes = async (id) => {
-    const blogToUpdate = blogs.find((b) => b.id === id);
-    const updatedBlog = {
-      ...blogToUpdate,
-      user: blogToUpdate.user.id,
-      likes: blogToUpdate.likes + 1,
-    };
-
-    await blogService.update(updatedBlog);
-    setBlogs(
-      blogs.map((b) =>
-        b.id !== id ? b : { ...blogToUpdate, likes: blogToUpdate.likes + 1 }
-      )
-    );
+  const updateBlogLikes = (blog) => {
+    dispatch(likeActionCreators(blog));
   };
 
-  const deleteBlog = async (id) => {
-    const blogToDelete = blogs.find((b) => b.id === id);
-    await blogService.remove(blogToDelete);
-    setBlogs(blogs.filter((blog) => blog.id !== id));
+  const deleteBlog = async (blog) => {
+    dispatch(deleteActionCreators(blog));
   };
 
   return (

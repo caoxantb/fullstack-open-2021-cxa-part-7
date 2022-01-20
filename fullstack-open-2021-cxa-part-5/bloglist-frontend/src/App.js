@@ -3,8 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Blog from "./components/Blog";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
-import blogService from "./services/blogs";
-import loginService from "./services/login";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -15,13 +13,18 @@ import {
   likeActionCreators,
   deleteActionCreators,
 } from "./reducers/blogReducer";
+import {
+  loginActionCreators,
+  logoutActionCreators,
+  parseActionCreators,
+} from "./reducers/userReducer";
 
 const App = () => {
-  const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const blogs = useSelector((state) => state.blog);
+  const user = useSelector((state) => state.user);
   const noti = useSelector((state) => state.noti);
   const dispatch = useDispatch();
 
@@ -30,25 +33,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedUser");
-    if (loggedUserJSON) {
-      const parsedUser = JSON.parse(loggedUserJSON);
-      setUser(parsedUser);
-      blogService.setToken(parsedUser.token);
-    }
+    dispatch(parseActionCreators());
   }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
       const credentials = { username, password };
-      const loggedUser = await loginService.login(credentials);
-
-      window.localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-
-      blogService.setToken(loggedUser.token);
-
-      setUser(loggedUser);
+      dispatch(loginActionCreators(credentials));
       setUsername("");
       setPassword("");
     } catch (ex) {
@@ -62,9 +54,7 @@ const App = () => {
 
   const handleLogout = async (event) => {
     event.preventDefault();
-
-    window.localStorage.removeItem("loggedUser");
-    setUser(null);
+    dispatch(logoutActionCreators());
   };
 
   const loginForm = (

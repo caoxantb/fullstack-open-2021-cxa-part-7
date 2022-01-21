@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 
+import { Switch, Route, useRouteMatch, Link } from "react-router-dom";
+
 import Blog from "./components/Blog";
+import BlogView from "./components/BlogView";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
+import Users from "./components/Users";
+import UserView from "./components/UserView";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -10,22 +15,22 @@ import { initializeNotiActionCreators } from "./reducers/notiReducer";
 import {
   getBlogsActionCreators,
   addBlogActionCreators,
-  likeActionCreators,
-  deleteActionCreators,
-} from "./reducers/blogReducer";
+} from "./reducers/blogsReducer";
+
 import {
   loginActionCreators,
   logoutActionCreators,
   parseActionCreators,
-} from "./reducers/userReducer";
+} from "./reducers/loginReducer";
 
 const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const blogs = useSelector((state) => state.blog);
-  const user = useSelector((state) => state.user);
+  const blogs = useSelector((state) => state.blogs);
+  const user = useSelector((state) => state.login);
   const noti = useSelector((state) => state.noti);
+  const users = useSelector((state) => state.users);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -55,6 +60,19 @@ const App = () => {
   const handleLogout = async (event) => {
     event.preventDefault();
     dispatch(logoutActionCreators());
+  };
+
+  const blogFormRef = useRef();
+
+  const addBlog = (newBlog) => {
+    dispatch(addBlogActionCreators(newBlog));
+    blogFormRef.current.toggleVisibility();
+    dispatch(
+      initializeNotiActionCreators(
+        `a new blog ${newBlog.title} by ${newBlog.author} added`,
+        5000
+      )
+    );
   };
 
   const loginForm = (
@@ -89,27 +107,18 @@ const App = () => {
     </div>
   );
 
-  const blogFormRef = useRef();
+  const userMatch = useRouteMatch("/users/:id");
+  const userView = userMatch
+    ? users.find((u) => u.id === userMatch.params.id)
+    : null;
 
-  const addBlog = (newBlog) => {
-    dispatch(addBlogActionCreators(newBlog));
+  const blogMatch = useRouteMatch("/blogs/:id");
+  const blogView = blogMatch
+    ? blogs.find((b) => b.id === blogMatch.params.id)
+    : null;
 
-    blogFormRef.current.toggleVisibility();
-
-    dispatch(
-      initializeNotiActionCreators(
-        `a new blog ${newBlog.title} by ${newBlog.author} added`,
-        5000
-      )
-    );
-  };
-
-  const updateBlogLikes = (blog) => {
-    dispatch(likeActionCreators(blog));
-  };
-
-  const deleteBlog = async (blog) => {
-    dispatch(deleteActionCreators(blog));
+  const navStyle = {
+    padding: 5,
   };
 
   return (
@@ -119,32 +128,48 @@ const App = () => {
       ) : (
         <div>
           <div>
-            {user.name} logged in <button onClick={handleLogout}>logout</button>
+            <Link style={navStyle} to="/">
+              blogs
+            </Link>
+            <Link style={navStyle} to="/users">
+              users
+            </Link>
+            <span style={navStyle}>
+              {user.name} logged in{" "}
+              <button onClick={handleLogout}>logout</button>
+            </span>
           </div>
-          <h2>create new blog</h2>
-          <Togglable
-            buttonShowId="button-togg-create-new-blog"
-            buttonLabelShow="create new blog"
-            buttonLabelHide="cancel"
-            ref={blogFormRef}
-          >
-            <BlogForm createBlog={addBlog} />
-          </Togglable>
-          <h2>blogs</h2>
-          <h3>{noti}</h3>
-          {blogs
-            .sort((a, b) => {
-              return b.likes - a.likes;
-            })
-            .map((blog) => (
-              <Blog
-                key={blog.id}
-                blog={blog}
-                updateBlogLikes={updateBlogLikes}
-                deleteBlog={deleteBlog}
-                user={user}
-              />
-            ))}
+          <Switch>
+            <Route path="/users/:id">
+              <UserView userView={userView} />
+            </Route>
+            <Route path="/users">
+              <Users />
+            </Route>
+            <Route path="/blogs/:id">
+              <BlogView blogView={blogView} user={user} />
+            </Route>
+            <Route path="/">
+              <h2>create new blog</h2>
+              <Togglable
+                buttonShowId="button-togg-create-new-blog"
+                buttonLabelShow="create new blog"
+                buttonLabelHide="cancel"
+                ref={blogFormRef}
+              >
+                <BlogForm createBlog={addBlog} />
+              </Togglable>
+              <h2>blogs</h2>
+              <h3>{noti}</h3>
+              {blogs
+                .sort((a, b) => {
+                  return b.likes - a.likes;
+                })
+                .map((blog) => (
+                  <Blog key={blog.id} blog={blog} />
+                ))}
+            </Route>
+          </Switch>
         </div>
       )}
     </div>

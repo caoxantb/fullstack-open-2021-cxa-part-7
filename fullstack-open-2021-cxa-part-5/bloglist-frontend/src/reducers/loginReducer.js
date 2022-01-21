@@ -3,7 +3,7 @@ import blogService from "../services/blogs";
 
 const initialState = null;
 
-const userReducer = (state = initialState, action) => {
+const loginReducer = (state = initialState, action) => {
   switch (action.type) {
     case "LOGIN":
       return action.data;
@@ -50,4 +50,4 @@ export const parseActionCreators = () => {
     }
   };
 };
-export default userReducer;
+export default loginReducer;

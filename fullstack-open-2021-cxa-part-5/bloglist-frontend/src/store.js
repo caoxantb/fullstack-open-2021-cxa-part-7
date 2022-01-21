@@ -2,14 +2,16 @@ import { createStore, combineReducers, applyMiddleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import thunk from "redux-thunk";
 
-import blogReducer from "./reducers/blogReducer";
+import blogsReducer from "./reducers/blogsReducer";
 import notiReducer from "./reducers/notiReducer";
-import userReducer from "./reducers/userReducer";
+import loginReducer from "./reducers/loginReducer";
+import usersReducer from "./reducers/usersReducer";
 
 const reducer = combineReducers({
   noti: notiReducer,
-  blog: blogReducer,
-  user: userReducer,
+  blogs: blogsReducer,
+  login: loginReducer,
+  users: usersReducer,
 });
 
 const store = createStore(reducer, composeWithDevTools(applyMiddleware(thunk)));

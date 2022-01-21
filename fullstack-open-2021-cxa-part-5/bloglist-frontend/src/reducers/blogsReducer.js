@@ -2,7 +2,7 @@ import blogService from "../services/blogs";
 
 const initialState = [];
 
-const blogReducer = (state = initialState, action) => {
+const blogsReducer = (state = initialState, action) => {
   switch (action.type) {
     case "GET_BLOGS":
       return action.data;
@@ -68,4 +68,4 @@ export const deleteActionCreators = (blog) => {
   };
 };
 
-export default blogReducer;
+export default blogsReducer;

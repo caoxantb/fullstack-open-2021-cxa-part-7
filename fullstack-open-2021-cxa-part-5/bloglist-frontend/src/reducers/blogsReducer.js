@@ -11,11 +11,20 @@ const blogsReducer = (state = initialState, action) => {
     case "LIKE": {
       const id = action.data.id;
       const blogLiked = state.find((b) => b.id === id);
-      const blogsUpdated = {
+      const blogUpdated = {
         ...blogLiked,
         likes: blogLiked.likes + 1,
       };
-      return state.map((b) => (b.id !== id ? b : blogsUpdated));
+      return state.map((b) => (b.id !== id ? b : blogUpdated));
+    }
+    case "ADD_COMMENT": {
+      const id = action.data.id;
+      const blogCommented = state.find((b) => b.id === id);
+      const blogUpdated = {
+        ...blogCommented,
+        comments: action.data.comments,
+      };
+      return state.map((b) => (b.id !== id ? b : blogUpdated));
     }
     case "DELETE": {
       const id = action.data.id;
@@ -42,6 +51,16 @@ export const addBlogActionCreators = (blog) => {
     dispatch({
       type: "ADD_BLOG",
       data: newBlog,
+    });
+  };
+};
+
+export const addCommentActionCreators = (id, comment) => {
+  return async (dispatch) => {
+    const BlogToComment = await blogService.createComment(id, comment);
+    dispatch({
+      type: "ADD_COMMENT",
+      data: BlogToComment,
     });
   };
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { Switch, Route, useRouteMatch, Link } from "react-router-dom";
 
-import Blog from "./components/Blog";
 import BlogView from "./components/BlogView";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
@@ -22,6 +21,9 @@ import {
   logoutActionCreators,
   parseActionCreators,
 } from "./reducers/loginReducer";
+
+import { Table, Form, Button } from "react-bootstrap";
+import { Alert } from "@material-ui/lab";
 
 const App = () => {
   const [username, setUsername] = useState("");
@@ -45,7 +47,7 @@ const App = () => {
     event.preventDefault();
     try {
       const credentials = { username, password };
-      dispatch(loginActionCreators(credentials));
+      await dispatch(loginActionCreators(credentials));
       setUsername("");
       setPassword("");
     } catch (ex) {
@@ -76,34 +78,39 @@ const App = () => {
   };
 
   const loginForm = (
-    <div>
-      <h2>Log in</h2>
-      <h3 className="error">{noti}</h3>
-      <form onSubmit={handleLogin}>
-        <div>
-          username
-          <input
-            id="username"
+    <div className="container">
+      <h2 className="m-3">login</h2>
+      {noti && (
+        <Alert className="m-3" severity="error">
+          {noti}
+        </Alert>
+      )}
+      <Form className="m-3" onSubmit={handleLogin}>
+        <Form.Group>
+          <Form.Label>Username</Form.Label>
+          <Form.Control
             type="text"
+            placeholder="Username"
             value={username}
             name="Username"
             onChange={({ target }) => setUsername(target.value)}
           />
-        </div>
-        <div>
-          password
-          <input
-            id="password"
+        </Form.Group>
+
+        <Form.Group controlId="formBasicPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
             type="password"
             value={password}
             name="Password"
             onChange={({ target }) => setPassword(target.value)}
+            placeholder="Password"
           />
-        </div>
-        <button id="login-button" type="submit">
-          login
-        </button>
-      </form>
+        </Form.Group>
+        <Button className="mt-2" variant="primary" type="submit">
+          Submit
+        </Button>
+      </Form>
     </div>
   );
 
@@ -126,7 +133,7 @@ const App = () => {
       {user === null ? (
         loginForm
       ) : (
-        <div>
+        <div className="container">
           <div>
             <Link style={navStyle} to="/">
               blogs
@@ -154,20 +161,29 @@ const App = () => {
               <Togglable
                 buttonShowId="button-togg-create-new-blog"
                 buttonLabelShow="create new blog"
-                buttonLabelHide="cancel"
+                buttonLabelHide="Cancel"
                 ref={blogFormRef}
               >
                 <BlogForm createBlog={addBlog} />
               </Togglable>
               <h2>blogs</h2>
-              <h3>{noti}</h3>
-              {blogs
-                .sort((a, b) => {
-                  return b.likes - a.likes;
-                })
-                .map((blog) => (
-                  <Blog key={blog.id} blog={blog} />
-                ))}
+              {noti && <Alert severity="success">{noti}</Alert>}
+              <Table striped>
+                <tbody>
+                  {blogs
+                    .sort((a, b) => {
+                      return b.likes - a.likes;
+                    })
+                    .map((blog) => (
+                      <tr key={blog.id}>
+                        <td>
+                          <Link to={`blogs/${blog.id}`}>{blog.title}</Link>
+                        </td>
+                        <td>{blog.author}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </Table>
             </Route>
           </Switch>
         </div>

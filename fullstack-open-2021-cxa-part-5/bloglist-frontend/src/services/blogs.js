@@ -18,6 +18,11 @@ const create = async (newObject) => {
   return response.data;
 };
 
+const createComment = async (id, comment) => {
+  const response = await axios.post(`${baseUrl}/${id}/comments`, comment);
+  return response.data;
+};
+
 const update = async (newObject) => {
   await axios.put(`${baseUrl}/${newObject.id}`, newObject);
 };
@@ -27,6 +32,6 @@ const remove = async (object) => {
   await axios.delete(`${baseUrl}/${object.id}`, config);
 };
 
-const exp = { setToken, getAll, create, update, remove };
+const exp = { setToken, getAll, create, createComment, update, remove };
 
 export default exp;

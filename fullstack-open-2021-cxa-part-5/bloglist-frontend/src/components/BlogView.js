@@ -1,21 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { useDispatch } from "react-redux";
+
+import { useHistory } from "react-router";
 
 import {
   likeActionCreators,
   deleteActionCreators,
+  addCommentActionCreators,
 } from "../reducers/blogsReducer";
 
 const UserView = ({ blogView, user }) => {
-  const dispatch = useDispatch();
+  const [comment, setComment] = useState("");
 
-  const updateBlogLikes = (blog) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const updateBlogLikes = async (blog) => {
     dispatch(likeActionCreators(blog));
+  };
+
+  const addComment = (event, id, comm) => {
+    event.preventDefault();
+    dispatch(addCommentActionCreators(id, comm));
+    setComment("");
   };
 
   const deleteBlog = async (blog) => {
     dispatch(deleteActionCreators(blog));
+    history.push("/");
   };
 
   const deleteConfirmation = (blogToDelete) => {
@@ -52,6 +65,26 @@ const UserView = ({ blogView, user }) => {
       ) : (
         <div></div>
       )}
+      <h3>comments</h3>
+      <div>
+        <form
+          onSubmit={(event) =>
+            addComment(event, blogView.id, { comment: comment })
+          }
+        >
+          <input
+            type="text"
+            value={comment}
+            onChange={({ target }) => setComment(target.value)}
+          />
+          <button type="submit">add comment</button>
+        </form>
+      </div>
+      <ul>
+        {blogView.comments.map((comm, i) => (
+          <li key={`${blogView.id}comment${i}`}>{comm}</li>
+        ))}
+      </ul>
     </div>
   );
 };
